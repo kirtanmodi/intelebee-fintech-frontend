@@ -1,52 +1,52 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import MainLayout from "../components/Layout/MainLayout";
+import LoadingSpinner from "../components/ui/LoadingSpinner";
 import axios from "axios";
-import MainLayout from "./components/Layout/MainLayout";
-import LoadingSpinner from "./components/ui/LoadingSpinner";
 
-// interface Account {
-//   id: string;
-//   business_profile?: {
-//     name?: string;
-//   };
-//   charges_enabled: boolean;
-//   payouts_enabled: boolean;
-// }
+interface Account {
+  id: string;
+  business_profile?: {
+    name?: string;
+  };
+  charges_enabled: boolean;
+  payouts_enabled: boolean;
+}
 
 export default function Onboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // const [accounts, setAccounts] = useState<Account[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
 
-  // useEffect(() => {
-  //   fetchAccounts();
-  // }, []);
+  useEffect(() => {
+    fetchAccounts();
+  }, []);
 
-  // const fetchAccounts = async () => {
-  //   try {
-  //     const response = await axios.get(`${process.env.NEXT_PUBLIC_SERVERLESS_API_URL}/get-all-accounts`);
-  //     // setAccounts(response.data);
-  //   } catch (err) {
-  //     console.error("Error fetching accounts:", err);
-  //     setError(err instanceof Error ? err.message : "Failed to fetch accounts");
-  //   }
-  // };
+  const fetchAccounts = async () => {
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_SERVERLESS_API_URL}/get-all-accounts`);
+      setAccounts(response.data);
+    } catch (err) {
+      console.error("Error fetching accounts:", err);
+      setError(err instanceof Error ? err.message : "Failed to fetch accounts");
+    }
+  };
 
-  // const handleDeleteAccount = async (accountId: string) => {
-  //   if (!confirm("Are you sure you want to delete this account?")) return;
+  const handleDeleteAccount = async (accountId: string) => {
+    if (!confirm("Are you sure you want to delete this account?")) return;
 
-  //   try {
-  //     await axios.delete(`${process.env.NEXT_PUBLIC_SERVERLESS_API_URL}/delete-account`, {
-  //       data: { accountId },
-  //     });
-  //     fetchAccounts();
-  //   } catch (err) {
-  //     console.error("Error deleting account:", err);
-  //     setError(err instanceof Error ? err.message : "Failed to delete account");
-  //   }
-  // };
+    try {
+      await axios.delete(`${process.env.NEXT_PUBLIC_SERVERLESS_API_URL}/delete-account`, {
+        data: { accountId },
+      });
+      fetchAccounts();
+    } catch (err) {
+      console.error("Error deleting account:", err);
+      setError(err instanceof Error ? err.message : "Failed to delete account");
+    }
+  };
 
   const handleOnboard = async () => {
     setLoading(true);
@@ -129,7 +129,7 @@ export default function Onboard() {
             <p className="mt-6 text-gray-400 text-sm text-center">Begin your journey as a merchant partner</p>
           </motion.div>
 
-          {/* <div className="mt-8 w-full">
+          <div className="mt-8 w-full">
             <h2 className="text-xl font-semibold text-white mb-4">Connected Accounts</h2>
             {accounts.map((account) => (
               <div key={account.id} className="bg-gray-800/50 backdrop-blur-lg rounded-lg p-4 mb-4 border border-gray-700">
@@ -148,7 +148,7 @@ export default function Onboard() {
                 </div>
               </div>
             ))}
-          </div> */}
+          </div>
         </div>
       </motion.div>
     </MainLayout>
