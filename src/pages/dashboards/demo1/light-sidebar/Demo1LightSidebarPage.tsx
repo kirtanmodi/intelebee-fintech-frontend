@@ -9,6 +9,7 @@ import { DateRange } from 'react-day-picker';
 import { addDays, format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { KeenIcon } from '@/components/keenicons';
+import Counter from '@/reducer/counter/Counter';
 
 const Demo1LightSidebarPage = () => {
   const [date, setDate] = useState<DateRange | undefined>({
@@ -21,6 +22,7 @@ const Demo1LightSidebarPage = () => {
       <Container>
         <Toolbar>
           <ToolbarHeading title="Dashboard" description="Welcome to the Dashboard" />
+          <Counter />
           {/* <ToolbarActions>
             <Popover>
               <PopoverTrigger asChild>
