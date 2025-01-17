@@ -18,6 +18,7 @@ const ConnectedAccountsPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [updating, setUpdating] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAccounts();
@@ -49,6 +50,22 @@ const ConnectedAccountsPage = () => {
     } catch (err) {
       console.error('Error deleting account:', err);
       setError(err instanceof Error ? err.message : 'Failed to delete account');
+    }
+  };
+
+  const handleUpdateSettings = async (accountId: string) => {
+    setUpdating(accountId);
+    try {
+      await axios.post(`${import.meta.env.VITE_SERVERLESS_API_URL}/update-account-settings`, {
+        accountId
+      });
+      // Show success message
+      alert('Account settings updated successfully');
+    } catch (err) {
+      console.error('Error updating account settings:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update account settings');
+    } finally {
+      setUpdating(null);
     }
   };
 
@@ -106,16 +123,29 @@ const ConnectedAccountsPage = () => {
                       </span>
                     </div>
                   </div>
-                  <button
-                    onClick={() => handleDeleteAccount(account.id)}
-                    className="mt-4 w-full px-4 py-2 text-sm text-destructive dark:text-destructive 
-                      hover:bg-destructive/10 dark:hover:bg-destructive/20 
-                      rounded-lg transition-colors 
-                      bg-destructive/5 dark:bg-destructive/10
-                      border border-destructive/20 dark:border-destructive/30"
-                  >
-                    Delete Account
-                  </button>
+                  <div className="flex flex-col gap-2 mt-4">
+                    <button
+                      onClick={() => handleDeleteAccount(account.id)}
+                      className="w-full px-4 py-2 text-sm text-destructive dark:text-destructive 
+                        hover:bg-destructive/10 dark:hover:bg-destructive/20 
+                        rounded-lg transition-colors 
+                        bg-destructive/5 dark:bg-destructive/10
+                        border border-destructive/20 dark:border-destructive/30"
+                    >
+                      Delete Account
+                    </button>
+                    <button
+                      onClick={() => handleUpdateSettings(account.id)}
+                      disabled={updating === account.id}
+                      className="w-full px-4 py-2 text-sm text-primary dark:text-primary 
+                        hover:bg-primary/10 dark:hover:bg-primary/20 
+                        rounded-lg transition-colors 
+                        bg-primary/5 dark:bg-primary/10
+                        border border-primary/20 dark:border-primary/30"
+                    >
+                      {updating === account.id ? 'Updating...' : 'Update Settings'}
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             ))}
