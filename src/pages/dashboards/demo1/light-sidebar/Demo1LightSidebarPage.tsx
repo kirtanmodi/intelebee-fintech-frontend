@@ -3,14 +3,8 @@ import { Toolbar, ToolbarHeading } from '@/layouts/demo1/toolbar';
 import { Fragment, useState } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-// import { addDays } from 'date-fns';
-// import { DateRange } from 'react-day-picker';
 
 const Demo1LightSidebarPage = () => {
-  // const [date, setDate] = useState<DateRange | undefined>({
-  //   from: new Date(2025, 0, 20),
-  //   to: addDays(new Date(2025, 0, 20), 20)
-  // });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,16 +44,14 @@ const Demo1LightSidebarPage = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"
+              className="bg-card dark:bg-card text-card-foreground dark:text-card-foreground rounded-lg shadow-sm border border-border"
             >
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-medium text-gray-900 dark:text-white">
-                    Merchant Setup
-                  </h2>
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                  <h2 className="text-lg font-medium">Merchant Setup</h2>
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 dark:bg-primary/20">
                     <svg
-                      className="h-5 w-5 text-blue-600 dark:text-blue-400"
+                      className="h-5 w-5 text-primary dark:text-primary"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -74,7 +66,7 @@ const Demo1LightSidebarPage = () => {
                   </span>
                 </div>
 
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground mb-6">
                   Complete your merchant verification and start accepting payments today.
                 </p>
 
@@ -82,7 +74,7 @@ const Demo1LightSidebarPage = () => {
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="mb-4 p-3 rounded bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 text-red-600 dark:text-red-400 text-sm"
+                    className="mb-4 p-3 rounded bg-destructive/10 dark:bg-destructive/20 border border-destructive/20 dark:border-destructive/30 text-destructive dark:text-destructive/90 text-sm"
                   >
                     {error}
                   </motion.div>
@@ -97,9 +89,9 @@ const Demo1LightSidebarPage = () => {
                     w-full py-2.5 px-4 rounded-lg
                     text-sm font-medium
                     transition-all duration-200
-                    bg-blue-600 hover:bg-blue-700 text-white
+                    bg-primary hover:bg-primary/90 text-primary-foreground
                     disabled:opacity-50 disabled:cursor-not-allowed
-                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800
+                    focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-card
                   `}
                 >
                   {loading ? (
@@ -128,13 +120,6 @@ const Demo1LightSidebarPage = () => {
                 </motion.button>
               </div>
             </motion.div>
-
-            {/* Placeholder for other feature cards */}
-            {/* <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-              <div className="h-full flex items-center justify-center">
-                <p className="text-gray-400 dark:text-gray-500">Additional Feature</p>
-              </div>
-            </div> */}
           </div>
         </div>
       </Container>

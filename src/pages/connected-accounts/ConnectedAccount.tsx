@@ -61,14 +61,20 @@ const ConnectedAccountsPage = () => {
         className="w-full"
       >
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-semibold">Connected Accounts</h1>
+          <h1 className="text-2xl font-semibold text-foreground dark:text-foreground">
+            Connected Accounts
+          </h1>
         </div>
 
-        {error && <div className="mb-6 p-4 rounded-lg bg-error-50 text-error text-sm">{error}</div>}
+        {error && (
+          <div className="mb-6 p-4 rounded-lg bg-destructive/10 dark:bg-destructive/20 text-destructive dark:text-destructive/90 text-sm border border-destructive/20 dark:border-destructive/30">
+            {error}
+          </div>
+        )}
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary dark:border-primary" />
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -77,28 +83,36 @@ const ConnectedAccountsPage = () => {
                 key={account.id}
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="bg-card rounded-lg p-6 border border-border"
+                className="bg-card dark:bg-card text-card-foreground dark:text-card-foreground rounded-lg p-6 border border-border"
               >
                 <div className="flex flex-col h-full">
                   <div className="flex-1">
                     <h3 className="text-lg font-medium mb-2">
                       {account.business_profile?.name || 'Unnamed Account'}
                     </h3>
-                    <p className="text-sm text-muted-foreground mb-1">ID: {account.id}</p>
+                    <p className="text-sm text-muted-foreground dark:text-muted-foreground mb-1">
+                      ID: {account.id}
+                    </p>
                     <div className="flex items-center space-x-2">
                       <span
                         className={`w-2 h-2 rounded-full ${
-                          account.charges_enabled ? 'bg-success' : 'bg-warning'
+                          account.charges_enabled
+                            ? 'bg-success dark:bg-success'
+                            : 'bg-warning dark:bg-warning'
                         }`}
                       />
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-muted-foreground dark:text-muted-foreground">
                         {account.charges_enabled ? 'Active' : 'Pending'}
                       </span>
                     </div>
                   </div>
                   <button
                     onClick={() => handleDeleteAccount(account.id)}
-                    className="mt-4 w-full px-4 py-2 text-sm text-error hover:bg-error-50 rounded-lg transition-colors bg-red-50"
+                    className="mt-4 w-full px-4 py-2 text-sm text-destructive dark:text-destructive 
+                      hover:bg-destructive/10 dark:hover:bg-destructive/20 
+                      rounded-lg transition-colors 
+                      bg-destructive/5 dark:bg-destructive/10
+                      border border-destructive/20 dark:border-destructive/30"
                   >
                     Delete Account
                   </button>
