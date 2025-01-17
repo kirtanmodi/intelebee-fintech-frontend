@@ -2,9 +2,14 @@ import { type TMenuConfig } from '@/components/menu';
 
 export const MENU_SIDEBAR: TMenuConfig = [
   {
-    title: 'Dashboard',
+    title: 'Home',
     icon: 'home',
     path: '/'
+  },
+  {
+    title: 'Connected Accounts',
+    icon: 'users',
+    path: '/connected-accounts'
   }
   // {
   //   heading: 'User'

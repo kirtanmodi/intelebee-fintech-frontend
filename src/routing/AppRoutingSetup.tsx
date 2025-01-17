@@ -82,6 +82,7 @@ import {
   AuthenticationAccountDeactivatedPage,
   AuthenticationGetStartedPage
 } from '@/pages/authentication';
+import { ConnectedAccountsPage } from '@/pages/connected-accounts/ConnectedAccount';
 
 const AppRoutingSetup = (): ReactElement => {
   return (
@@ -89,6 +90,7 @@ const AppRoutingSetup = (): ReactElement => {
       <Route element={<RequireAuth />}>
         <Route element={<Demo1Layout />}>
           <Route path="/" element={<DefaultPage />} />
+          <Route path="/connected-accounts" element={<ConnectedAccountsPage />} />
           {/* <Route path="/dark-sidebar" element={<Demo1DarkSidebarPage />} />
           <Route path="/public-profile/profiles/default" element={<ProfileDefaultPage />} />
           <Route path="/public-profile/profiles/creator" element={<ProfileCreatorPage />} />
