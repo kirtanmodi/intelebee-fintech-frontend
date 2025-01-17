@@ -175,7 +175,7 @@ const Demo1LightSidebarPage = () => {
             >
               <div className="border-b border-border">
                 <nav className="flex">
-                  {(['express', 'standard', 'custom'] as const).map((tab) => (
+                  {(['express', 'standard'] as const).map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
