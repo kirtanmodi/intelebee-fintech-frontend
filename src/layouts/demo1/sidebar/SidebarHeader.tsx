@@ -6,27 +6,26 @@ import { SidebarToggle } from './';
 
 const SidebarHeader = forwardRef<HTMLDivElement, any>((props, ref) => {
   const { layout } = useDemo1Layout();
-
   const lightLogo = () => (
     <Fragment>
       <Link to="/" className="dark:hidden">
         <img
-          src={toAbsoluteUrl('/media/app/default-logo.svg')}
-          className="default-logo min-h-[22px] max-w-none"
+          src={toAbsoluteUrl('/media/app/intelebee1.png')}
+          className="default-logo h-auto w-auto"
         />
         <img
-          src={toAbsoluteUrl('/media/app/mini-logo.svg')}
-          className="small-logo min-h-[22px] max-w-none"
+          src={toAbsoluteUrl('/media/app/intelebee1.png')}
+          className="small-logo h-auto w-auto"
         />
       </Link>
       <Link to="/" className="hidden dark:block">
         <img
-          src={toAbsoluteUrl('/media/app/default-logo-dark.svg')}
-          className="default-logo min-h-[22px] max-w-none"
+          src={toAbsoluteUrl('/media/app/intelebee1.png')}
+          className="default-logo h-auto w-auto"
         />
         <img
-          src={toAbsoluteUrl('/media/app/mini-logo.svg')}
-          className="small-logo min-h-[22px] max-w-none"
+          src={toAbsoluteUrl('/media/app/intelebee1.png')}
+          className="small-logo h-auto w-auto"
         />
       </Link>
     </Fragment>
@@ -35,13 +34,10 @@ const SidebarHeader = forwardRef<HTMLDivElement, any>((props, ref) => {
   const darkLogo = () => (
     <Link to="/">
       <img
-        src={toAbsoluteUrl('/media/app/default-logo-dark.svg')}
-        className="default-logo min-h-[22px] max-w-none"
+        src={toAbsoluteUrl('/media/app/intelebee1.png')}
+        className="default-logo h-auto w-auto"
       />
-      <img
-        src={toAbsoluteUrl('/media/app/mini-logo.svg')}
-        className="small-logo min-h-[22px] max-w-none"
-      />
+      <img src={toAbsoluteUrl('/media/app/intelebee1.png')} className="small-logo h-auto w-auto" />
     </Link>
   );
 

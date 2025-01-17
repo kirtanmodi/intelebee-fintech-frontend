@@ -10,16 +10,25 @@ const Demo1LightSidebarPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<OnboardingType>('express');
+  const [email, setEmail] = useState('');
 
   const handleOnboard = async (type: OnboardingType) => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_SERVERLESS_API_URL}/create-onboarding-link`,
-        { type }
-      );
+      if (type === 'standard' && !email) {
+        throw new Error('Email is required for standard onboarding');
+      }
+
+      const endpoint =
+        type === 'standard'
+          ? `${import.meta.env.VITE_SERVERLESS_API_URL}/create-standard-onboarding`
+          : `${import.meta.env.VITE_SERVERLESS_API_URL}/create-onboarding-link`;
+
+      const payload = type === 'standard' ? { email } : { type };
+
+      const response = await axios.post(endpoint, payload);
 
       if (!response.data?.url) {
         throw new Error('Failed to create onboarding link');
@@ -80,6 +89,23 @@ const Demo1LightSidebarPage = () => {
           {content.description}
         </p>
 
+        {type === 'standard' && (
+          <div className="mb-4">
+            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
+              Email Address
+            </label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground
+                focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="Enter your email"
+            />
+          </div>
+        )}
+
         {error && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -135,28 +161,11 @@ const Demo1LightSidebarPage = () => {
   return (
     <Fragment>
       <Container>
-        <div className="py-6">
-          <div className="mb-6 border-b border-border">
-            <nav className="flex">
-              {(['express', 'standard', 'custom'] as const).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`
-                    px-6 py-3 text-sm font-medium text-center
-                    ${
-                      activeTab === tab
-                        ? 'border-b-2 border-primary text-primary'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }
-                  `}
-                >
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                </button>
-              ))}
-            </nav>
-          </div>
+        <Toolbar>
+          <ToolbarHeading title="Dashboard" description="Welcome to the Dashboard" />
+        </Toolbar>
 
+        <div className="py-6 px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -164,6 +173,26 @@ const Demo1LightSidebarPage = () => {
               transition={{ duration: 0.3 }}
               className="col-span-1 bg-card dark:bg-card text-card-foreground dark:text-card-foreground rounded-lg shadow-sm border border-border"
             >
+              <div className="border-b border-border">
+                <nav className="flex">
+                  {(['express', 'standard', 'custom'] as const).map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`
+                        flex-1 px-4 py-2 text-sm font-medium text-center
+                        ${
+                          activeTab === tab
+                            ? 'border-b-2 border-primary text-primary'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }
+                      `}
+                    >
+                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    </button>
+                  ))}
+                </nav>
+              </div>
               {renderTabContent(activeTab)}
             </motion.div>
           </div>
