@@ -1,95 +1,40 @@
+import { Demo1LightSidebarPage } from '@/pages/dashboards';
 import { ReactElement } from 'react';
 import { Navigate, Route, Routes } from 'react-router';
-import { DefaultPage, Demo1DarkSidebarPage } from '@/pages/dashboards';
-import {
-  ProfileActivityPage,
-  ProfileBloggerPage,
-  CampaignsCardPage,
-  CampaignsListPage,
-  ProjectColumn2Page,
-  ProjectColumn3Page,
-  ProfileCompanyPage,
-  ProfileCreatorPage,
-  ProfileCRMPage,
-  ProfileDefaultPage,
-  ProfileEmptyPage,
-  ProfileFeedsPage,
-  ProfileGamerPage,
-  ProfileModalPage,
-  ProfileNetworkPage,
-  ProfileNFTPage,
-  ProfilePlainPage,
-  ProfileTeamsPage,
-  ProfileWorksPage
-} from '@/pages/public-profile';
-import {
-  AccountActivityPage,
-  AccountAllowedIPAddressesPage,
-  AccountApiKeysPage,
-  AccountAppearancePage,
-  AccountBackupAndRecoveryPage,
-  AccountBasicPage,
-  AccountCompanyProfilePage,
-  AccountCurrentSessionsPage,
-  AccountDeviceManagementPage,
-  AccountEnterprisePage,
-  AccountGetStartedPage,
-  AccountHistoryPage,
-  AccountImportMembersPage,
-  AccountIntegrationsPage,
-  AccountInviteAFriendPage,
-  AccountMembersStarterPage,
-  AccountNotificationsPage,
-  AccountOverviewPage,
-  AccountPermissionsCheckPage,
-  AccountPermissionsTogglePage,
-  AccountPlansPage,
-  AccountPrivacySettingsPage,
-  AccountRolesPage,
-  AccountSecurityGetStartedPage,
-  AccountSecurityLogPage,
-  AccountSettingsEnterprisePage,
-  AccountSettingsModalPage,
-  AccountSettingsPlainPage,
-  AccountSettingsSidebarPage,
-  AccountTeamInfoPage,
-  AccountTeamMembersPage,
-  AccountTeamsPage,
-  AccountTeamsStarterPage,
-  AccountUserProfilePage
-} from '@/pages/account';
-import {
-  NetworkAppRosterPage,
-  NetworkMarketAuthorsPage,
-  NetworkAuthorPage,
-  NetworkGetStartedPage,
-  NetworkMiniCardsPage,
-  NetworkNFTPage,
-  NetworkSocialPage,
-  NetworkUserCardsTeamCrewPage,
-  NetworkSaasUsersPage,
-  NetworkStoreClientsPage,
-  NetworkUserTableTeamCrewPage,
-  NetworkVisitorsPage
-} from '@/pages/network';
 
 import { AuthPage } from '@/auth';
 import { RequireAuth } from '@/auth/RequireAuth';
-import { Demo1Layout } from '@/layouts/demo1';
 import { ErrorsRouting } from '@/errors';
-import {
-  AuthenticationWelcomeMessagePage,
-  AuthenticationAccountDeactivatedPage,
-  AuthenticationGetStartedPage
-} from '@/pages/authentication';
+import { Demo1Layout } from '@/layouts/demo1';
 import { ConnectedAccountsPage } from '@/pages/connected-accounts/ConnectedAccount';
+import ExpressDashboardAccess from '@/pages/stripe-express/dashboard/ExpressDashboardAccess';
+import ExpressDashboardConfig from '@/pages/stripe-express/dashboard/ExpressDashboardConfig';
+import ExpressOnboarding from '@/pages/stripe-express/onboarding/ExpressOnboarding';
+import StandardDashboardAccess from '@/pages/stripe-standard/dashboard/StandardDashboardAccess';
+import { StandardOnboarding } from '@/pages/stripe-standard/standard-onboarding/StandardOnboarding';
+import OnboardingComplete from '@/pages/stripe-express/onboarding/OnboardingComplete';
+import StandardOnboardingComplete from '@/pages/stripe-standard/standard-onboarding/StandardOnboardingComplete';
 
 const AppRoutingSetup = (): ReactElement => {
   return (
     <Routes>
       <Route element={<RequireAuth />}>
         <Route element={<Demo1Layout />}>
-          <Route path="/" element={<DefaultPage />} />
+          <Route path="/" element={<Demo1LightSidebarPage />} />
+          {/* Stripe Express */}
+          <Route path="/stripe-express/onboarding" element={<ExpressOnboarding />} />
+          <Route path="/stripe-express/dashboard/access" element={<ExpressDashboardAccess />} />
+          <Route path="/stripe-express/onboarding/complete" element={<OnboardingComplete />} />
+          <Route path="/stripe-express/dashboard/config" element={<ExpressDashboardConfig />} />
+          {/* Stripe Standard */}
+          <Route path="/stripe-standard/onboarding" element={<StandardOnboarding />} />
+          <Route path="/stripe-standard/dashboard/access" element={<StandardDashboardAccess />} />
+          <Route
+            path="/stripe-standard/onboarding/complete"
+            element={<StandardOnboardingComplete />}
+          />
+          <Route path="/stripe-standard/dashboard/config" element={<ExpressDashboardConfig />} />
+          {/* Connected Accounts */}
           <Route path="/connected-accounts" element={<ConnectedAccountsPage />} />
           {/* <Route path="/dark-sidebar" element={<Demo1DarkSidebarPage />} />
           <Route path="/public-profile/profiles/default" element={<ProfileDefaultPage />} />

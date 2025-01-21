@@ -2,10 +2,36 @@ import { type TMenuConfig } from '@/components/menu';
 
 export const MENU_SIDEBAR: TMenuConfig = [
   {
-    title: 'Home',
-    icon: 'home',
+    title: 'Dashboard',
+    icon: 'abstract',
     path: '/'
   },
+  // {
+  //   title: 'Stripe Express',
+  //   icon: 'abstract-1',
+  //   children: [
+  //     {
+  //       title: 'Onboarding',
+  //       path: '/stripe-express/onboarding'
+  //     }
+  //   ]
+  // },
+  {
+    title: 'Stripe Standard',
+    icon: 'abstract-2',
+    path: '/stripe-standard',
+    children: [
+      {
+        title: 'Onboarding',
+        path: '/stripe-standard/onboarding'
+      }
+    ]
+  },
+  // {
+  //   title: 'Stripe Custom',
+  //   icon: 'abstract-3',
+  //   path: '/stripe-custom'
+  // },
   {
     title: 'Connected Accounts',
     icon: 'users',

@@ -2,201 +2,192 @@ import { Container } from '@/components/container';
 import { Toolbar, ToolbarHeading } from '@/layouts/demo1/toolbar';
 import { Fragment, useState } from 'react';
 import { motion } from 'framer-motion';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-type OnboardingType = 'express' | 'standard' | 'custom';
+type IntegrationType = 'express' | 'standard' | 'custom' | 'connected';
+
+interface IntegrationCard {
+  id: IntegrationType;
+  title: string;
+  description: string;
+  path: string;
+  icon: JSX.Element;
+}
 
 const Demo1LightSidebarPage = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<OnboardingType>('express');
-  const [email, setEmail] = useState('');
+  const navigate = useNavigate();
+  const [activeCard, setActiveCard] = useState<IntegrationType | null>(null);
+  const [isNavigating, setIsNavigating] = useState(false);
 
-  const handleOnboard = async (type: OnboardingType) => {
-    setLoading(true);
-    setError(null);
+  const integrationCards: IntegrationCard[] = [
+    // {
+    //   id: 'express',
+    //   title: 'Stripe Express',
+    //   description: 'Quick and simple setup with pre-configured settings for rapid integration.',
+    //   path: '/stripe-express/onboarding',
+    //   icon: (
+    //     <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    //       <path
+    //         strokeLinecap="round"
+    //         strokeLinejoin="round"
+    //         strokeWidth={2}
+    //         d="M13 10V3L4 14h7v7l9-11h-7z"
+    //       />
+    //     </svg>
+    //   )
+    // },
+    {
+      id: 'standard',
+      title: 'Stripe Standard',
+      description: 'Full-featured integration with customizable options and advanced features.',
+      path: '/stripe-standard/onboarding',
+      icon: (
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z"
+          />
+        </svg>
+      )
+    },
+    // {
+    //   id: 'custom',
+    //   title: 'Stripe Custom',
+    //   description: 'Advanced setup with complete control over the integration process.',
+    //   path: '/stripe-custom',
+    //   icon: (
+    //     <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    //       <path
+    //         strokeLinecap="round"
+    //         strokeLinejoin="round"
+    //         strokeWidth={2}
+    //         d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+    //       />
+    //     </svg>
+    //   )
+    // },
+    {
+      id: 'connected',
+      title: 'Connected Accounts',
+      description: 'Manage and monitor all your connected Stripe accounts in one place.',
+      path: '/connected-accounts',
+      icon: (
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+          />
+        </svg>
+      )
+    }
+  ];
 
+  const handleCardClick = async (card: IntegrationCard) => {
     try {
-      if (type === 'standard' && !email) {
-        throw new Error('Email is required for standard onboarding');
-      }
-
-      const endpoint =
-        type === 'standard'
-          ? `${import.meta.env.VITE_SERVERLESS_API_URL}/create-standard-onboarding`
-          : `${import.meta.env.VITE_SERVERLESS_API_URL}/create-onboarding-link`;
-
-      const payload = type === 'standard' ? { email } : { type };
-
-      const response = await axios.post(endpoint, payload);
-
-      if (!response.data?.url) {
-        throw new Error('Failed to create onboarding link');
-      }
-
-      window.location.href = response.data.url;
-    } catch (err) {
-      console.error('Onboarding error:', err);
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setActiveCard(card.id);
+      setIsNavigating(true);
+      await new Promise((resolve) => setTimeout(resolve, 400)); // Animation delay
+      navigate(card.path);
+    } catch (error) {
+      console.error('Navigation error:', error);
     } finally {
-      setLoading(false);
+      setIsNavigating(false);
+      setActiveCard(null);
     }
   };
 
-  const renderTabContent = (type: OnboardingType) => {
-    const contents = {
-      express: {
-        title: 'Express Onboarding',
-        description: 'Quick and simple setup with pre-configured settings.',
-        buttonText: 'Start Express Onboarding'
-      },
-      standard: {
-        title: 'Standard Connect',
-        description: 'Full-featured onboarding with customizable options.',
-        buttonText: 'Start Standard Onboarding'
-      },
-      custom: {
-        title: 'Custom Integration',
-        description: 'Advanced setup with complete control over the integration.',
-        buttonText: 'Start Custom Onboarding'
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
       }
-    };
+    }
+  };
 
-    const content = contents[type];
-
-    return (
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-medium">{content.title}</h2>
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 dark:bg-primary/20">
-            <svg
-              className="h-5 w-5 text-primary dark:text-primary"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-              />
-            </svg>
-          </span>
-        </div>
-
-        <p className="text-sm text-muted-foreground dark:text-muted-foreground mb-6">
-          {content.description}
-        </p>
-
-        {type === 'standard' && (
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
-              Email Address
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground
-                focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="Enter your email"
-            />
-          </div>
-        )}
-
-        {error && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mb-4 p-3 rounded bg-destructive/10 dark:bg-destructive/20 border border-destructive/20 dark:border-destructive/30 text-destructive dark:text-destructive/90 text-sm"
-          >
-            {error}
-          </motion.div>
-        )}
-
-        <motion.button
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.99 }}
-          onClick={() => handleOnboard(type)}
-          disabled={loading}
-          className={`
-            w-full py-2.5 px-4 rounded-lg
-            text-sm font-medium
-            transition-all duration-200
-            bg-primary hover:bg-primary/90 text-primary-foreground
-            disabled:opacity-50 disabled:cursor-not-allowed
-            focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-card
-          `}
-        >
-          {loading ? (
-            <span className="flex items-center justify-center gap-2">
-              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                  fill="none"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
-              Processing
-            </span>
-          ) : (
-            content.buttonText
-          )}
-        </motion.button>
-      </div>
-    );
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: 'spring',
+        stiffness: 300,
+        damping: 24
+      }
+    }
   };
 
   return (
     <Fragment>
       <Container>
         <Toolbar>
-          <ToolbarHeading title="Dashboard" description="Welcome to the Dashboard" />
+          <ToolbarHeading
+            title="Integration Dashboard"
+            description="Choose your preferred Stripe integration method"
+          />
         </Toolbar>
 
-        <div className="py-6 px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
+        >
+          {integrationCards.map((card) => (
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="col-span-1 bg-card dark:bg-card text-card-foreground dark:text-card-foreground rounded-lg shadow-sm border border-border"
+              key={card.id}
+              variants={cardVariants}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => handleCardClick(card)}
+              className={`
+                relative overflow-hidden
+                p-6 rounded-xl cursor-pointer
+                bg-card dark:bg-card/80
+                border border-border hover:border-primary/50
+                transition-colors duration-300
+                ${isNavigating ? 'pointer-events-none' : ''}
+                ${activeCard === card.id ? 'ring-2 ring-primary' : ''}
+              `}
             >
-              <div className="border-b border-border">
-                <nav className="flex">
-                  {(['express', 'standard'] as const).map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`
-                        flex-1 px-4 py-2 text-sm font-medium text-center
-                        ${
-                          activeTab === tab
-                            ? 'border-b-2 border-primary text-primary'
-                            : 'text-muted-foreground hover:text-foreground'
-                        }
-                      `}
-                    >
-                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                    </button>
-                  ))}
-                </nav>
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">{card.icon}</div>
+                <motion.div whileHover={{ rotate: 15 }} className="text-primary">
+                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"
+                    />
+                  </svg>
+                </motion.div>
               </div>
-              {renderTabContent(activeTab)}
+
+              <h3 className="text-lg font-semibold mb-2 text-foreground">{card.title}</h3>
+              <p className="text-sm text-muted-foreground">{card.description}</p>
+
+              {activeCard === card.id && (
+                <motion.div
+                  layoutId="highlight"
+                  className="absolute inset-0 bg-primary/5 dark:bg-primary/10"
+                  initial={false}
+                  transition={{
+                    type: 'spring',
+                    bounce: 0.2,
+                    duration: 0.6
+                  }}
+                />
+              )}
             </motion.div>
-          </div>
-        </div>
+          ))}
+        </motion.div>
       </Container>
     </Fragment>
   );
