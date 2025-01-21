@@ -9,7 +9,7 @@ import { Demo1Layout } from '@/layouts/demo1';
 import { ConnectedAccountsPage } from '@/pages/connected-accounts/ConnectedAccount';
 import ExpressDashboardAccess from '@/pages/stripe-express/dashboard/ExpressDashboardAccess';
 import ExpressDashboardConfig from '@/pages/stripe-express/dashboard/ExpressDashboardConfig';
-import ExpressOnboarding from '@/pages/stripe-express/onboarding/ExpressOnboarding';
+// import ExpressOnboarding from '@/pages/stripe-express/onboarding/ExpressOnboarding';
 import StandardDashboardAccess from '@/pages/stripe-standard/dashboard/StandardDashboardAccess';
 import { StandardOnboarding } from '@/pages/stripe-standard/standard-onboarding/StandardOnboarding';
 import OnboardingComplete from '@/pages/stripe-express/onboarding/OnboardingComplete';
@@ -22,7 +22,7 @@ const AppRoutingSetup = (): ReactElement => {
         <Route element={<Demo1Layout />}>
           <Route path="/" element={<Demo1LightSidebarPage />} />
           {/* Stripe Express */}
-          <Route path="/stripe-express/onboarding" element={<ExpressOnboarding />} />
+          {/* <Route path="/stripe-express/onboarding" element={<ExpressOnboarding />} /> */}
           <Route path="/stripe-express/dashboard/access" element={<ExpressDashboardAccess />} />
           <Route path="/stripe-express/onboarding/complete" element={<OnboardingComplete />} />
           <Route path="/stripe-express/dashboard/config" element={<ExpressDashboardConfig />} />
