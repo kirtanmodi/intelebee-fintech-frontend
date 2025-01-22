@@ -5,16 +5,14 @@ import axios, { AxiosError } from 'axios';
 import { toast } from 'sonner';
 
 interface AccountStatus {
-  body: {
-    details_submitted: boolean;
-    charges_enabled: boolean;
-    payouts_enabled: boolean;
-    capabilities?: {
-      card_payments?: string;
-      transfers?: string;
-      us_bank_account_ach_payments?: string;
-      tax_reporting_us_1099_k?: string;
-    };
+  details_submitted: boolean;
+  charges_enabled: boolean;
+  payouts_enabled: boolean;
+  capabilities?: {
+    card_payments?: string;
+    transfers?: string;
+    us_bank_account_ach_payments?: string;
+    tax_reporting_us_1099_k?: string;
   };
   requirements?: {
     currently_due: string[];
@@ -82,23 +80,11 @@ export const StandardOnboardingComplete: React.FC = () => {
         );
 
         console.log('response.data', response.data);
-        //   {
-        //     "success": true,
-        //     "statusCode": 200,
-        //     "headers": {
-        //         "Access-Control-Allow-Origin": "*",
-        //         "Access-Control-Allow-Headers": "Content-Type,Authorization,X-Requested-With,Origin,Accept",
-        //         "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS,HEAD",
-        //         "Access-Control-Max-Age": "3600"
-        //     },
-        //     "body": "{\"success\":true,\"details_submitted\":true,\"charges_enabled\":true,\"payouts_enabled\":true,\"requirements\":{\"currently_due\":[],\"eventually_due\":[],\"pending_verification\":[]},\"timestamp\":\"2025-01-22T17:47:54.737Z\"}",
-        //     "timestamp": "2025-01-22T17:47:54.737Z"
-        // }
-        const body = JSON.parse(response.data.body);
-        console.log('body', body);
+
+        const body = response.data;
         setAccountStatus(body);
 
-        if (response.data.details_submitted && response.data.charges_enabled) {
+        if (body.details_submitted && body.charges_enabled) {
           toast.success('Account setup completed successfully!');
         }
       } catch (error) {

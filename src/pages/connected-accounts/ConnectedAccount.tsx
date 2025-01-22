@@ -1,14 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Container } from '@/components';
 import axios from 'axios';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import EmbeddedUI from './EmbeddedUI';
-import { loadStripe } from '@stripe/stripe-js';
-import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js';
 import { EmbeddedCheckoutModal } from './EmbeddedCheckout';
+import EmbeddedUI from './EmbeddedUI';
 
 export interface CheckoutSessionRequest {
   accountId: string;
@@ -60,6 +58,20 @@ interface TestCard {
   instructions: string;
 }
 
+// interface AccountStatus {
+//   details_submitted: boolean;
+//   charges_enabled: boolean;
+//   payouts_enabled: boolean;
+//   capabilities?: {
+//     card_payments?: string;
+//     transfers?: string;
+//     us_bank_account_ach_payments?: string;
+//   };
+//   requirements?: {
+//     currently_due: string[];
+//   };
+// }
+
 const testCards: TestCard[] = [
   {
     number: '4242424242424242',
@@ -87,7 +99,6 @@ const ConnectedAccountsPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [accounts, setAccounts] = useState<Account[]>([]);
-  const [updating, setUpdating] = useState<string | null>(null);
   const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
   const [showDashboardModal, setShowDashboardModal] = useState(false);
   const [checkoutData, setCheckoutData] = useState<{
@@ -190,6 +201,35 @@ const ConnectedAccountsPage = () => {
   const handleCloseCheckout = () => {
     setCheckoutData(null);
   };
+
+  // const checkAccountStatus = async (accountId: string) => {
+  //   try {
+  //     const response = await axios.get<AccountStatus>(
+  //       `${import.meta.env.VITE_SERVERLESS_API_URL}/check-standard-account-status/${accountId}`,
+  //       { timeout: 10000 }
+  //     );
+
+  //     console.log('response.data', response.data);
+
+  //     const body = response.data;
+
+  //     if (body.charges_enabled) {
+  //       toast.success('Account is fully enabled!');
+  //     } else {
+  //       toast.warning('Account setup is incomplete');
+  //     }
+
+  //     if (body.requirements?.currently_due.length) {
+  //       toast.info(`Required information: ${body.requirements.currently_due.join(', ')}`);
+  //     }
+  //   } catch (error) {
+  //     let errorMessage = 'Failed to verify account status';
+  //     if (error instanceof AxiosError) {
+  //       errorMessage = error.response?.data?.message || error.message;
+  //     }
+  //     toast.error(errorMessage);
+  //   }
+  // };
 
   const TestCardInfoModal = () => (
     <AnimatePresence>
@@ -415,6 +455,32 @@ const ConnectedAccountsPage = () => {
                           </div>
                         </>
                       )}
+                      {/* <motion.button
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
+                        onClick={() => checkAccountStatus(account.id)}
+                        className="w-full px-4 py-2 text-sm text-blue-600 dark:text-blue-500
+                                 hover:bg-blue-50 dark:hover:bg-blue-900/20
+                                 rounded-lg transition-colors
+                                 bg-blue-50/50 dark:bg-blue-900/10
+                                 border border-blue-200 dark:border-blue-800
+                                 flex items-center justify-center gap-2"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        Check Account Status
+                      </motion.button> */}
                       <motion.button
                         whileHover={{ scale: 1.01 }}
                         whileTap={{ scale: 0.99 }}
