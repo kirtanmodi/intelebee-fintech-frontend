@@ -6,7 +6,32 @@ import { Container } from '@/components';
 import axios from 'axios';
 import { toast } from 'sonner';
 import EmbeddedUI from './EmbeddedUI';
+import { loadStripe } from '@stripe/stripe-js';
+import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js';
+import { EmbeddedCheckoutModal } from './EmbeddedCheckout';
 
+export interface CheckoutSessionRequest {
+  accountId: string;
+  returnUrl: string;
+  lineItems: Array<{
+    price_data: {
+      currency: string;
+      product_data: {
+        name: string;
+      };
+      unit_amount: number;
+    };
+    quantity: number;
+  }>;
+  mode: 'payment';
+  uiMode: 'embedded';
+}
+
+export interface CheckoutSessionResponse {
+  url: string;
+  clientSecret: string;
+  id: string;
+}
 interface Account {
   id: string;
   business_profile?: {
@@ -35,6 +60,10 @@ const ConnectedAccountsPage = () => {
   const [updating, setUpdating] = useState<string | null>(null);
   const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
   const [showDashboardModal, setShowDashboardModal] = useState(false);
+  const [checkoutData, setCheckoutData] = useState<{
+    clientSecret: string;
+    accountId: string;
+  } | null>(null);
 
   useEffect(() => {
     fetchAccounts();
@@ -58,21 +87,8 @@ const ConnectedAccountsPage = () => {
 
   const handleDashboardAccess = async (accountId: string) => {
     try {
-      // const response = await axios.post(
       setShowDashboardModal(true);
       setSelectedAccount(accountId);
-
-      //   `${import.meta.env.VITE_SERVERLESS_API_URL}/create-express-dashboard-link`,
-      //   {
-      //     accountId,
-      //     returnUrl: `${window.location.origin}/connected-accounts`
-      //   }
-      // );
-      // if (response.data?.url) {
-      //   window.location.href = response.data.url;
-      // } else {
-      //   throw new Error('No dashboard login URL received');
-      // }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to access dashboard';
       toast.error(errorMessage);
@@ -94,9 +110,47 @@ const ConnectedAccountsPage = () => {
     }
   };
 
-  const handleUpdateSettings = async (accountId: string) => {
-    setSelectedAccount(accountId);
-    setShowDashboardModal(true);
+  const handleTestPayment = async (accountId: string) => {
+    try {
+      const response = await axios.post<CheckoutSessionResponse>(
+        `${import.meta.env.VITE_SERVERLESS_API_URL}/create-checkout-session`,
+        {
+          accountId,
+          returnUrl: `${window.location.origin}/connected-accounts?session_id={CHECKOUT_SESSION_ID}`,
+          lineItems: [
+            {
+              price_data: {
+                currency: 'usd',
+                product_data: {
+                  name: 'Test Product'
+                },
+                unit_amount: 1000 // $10.00
+              },
+              quantity: 1
+            }
+          ],
+          mode: 'payment',
+          uiMode: 'embedded'
+        }
+      );
+
+      if (response.data?.clientSecret) {
+        setCheckoutData({
+          clientSecret: response.data.clientSecret,
+          accountId
+        });
+      } else {
+        throw new Error('No client secret received');
+      }
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to create test payment session';
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleCloseCheckout = () => {
+    setCheckoutData(null);
   };
 
   return (
@@ -193,19 +247,33 @@ const ConnectedAccountsPage = () => {
                             Access Dashboard
                           </motion.button>
 
-                          {/* <motion.button
+                          <motion.button
                             whileHover={{ scale: 1.01 }}
                             whileTap={{ scale: 0.99 }}
-                            onClick={() => handleUpdateSettings(account.id)}
-                            disabled={updating === account.id}
-                            className="w-full px-4 py-2 text-sm text-primary dark:text-primary 
-                                 hover:bg-primary/10 dark:hover:bg-primary/20 
-                                 rounded-lg transition-colors 
-                                 bg-primary/5 dark:bg-primary/10
-                                 border border-primary/20 dark:border-primary/30"
+                            onClick={() => handleTestPayment(account.id)}
+                            className="w-full px-4 py-2 text-sm text-emerald-600 dark:text-emerald-500
+                                 hover:bg-emerald-50 dark:hover:bg-emerald-900/20
+                                 rounded-lg transition-colors
+                                 bg-emerald-50/50 dark:bg-emerald-900/10
+                                 border border-emerald-200 dark:border-emerald-800
+                                 flex items-center justify-center gap-2"
                           >
-                            {updating === account.id ? 'Updating...' : 'Configure Dashboard'}
-                          </motion.button> */}
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                              />
+                            </svg>
+                            Make Test Payment
+                          </motion.button>
                         </>
                       )}
                       <motion.button
@@ -268,6 +336,14 @@ const ConnectedAccountsPage = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {checkoutData && (
+        <EmbeddedCheckoutModal
+          clientSecret={checkoutData.clientSecret}
+          accountId={checkoutData.accountId}
+          onClose={handleCloseCheckout}
+        />
+      )}
     </Container>
   );
 };
