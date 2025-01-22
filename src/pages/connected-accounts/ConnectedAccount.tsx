@@ -32,6 +32,7 @@ export interface CheckoutSessionResponse {
   clientSecret: string;
   id: string;
 }
+
 interface Account {
   id: string;
   business_profile?: {
@@ -53,6 +54,35 @@ interface Account {
   };
 }
 
+interface TestCard {
+  number: string;
+  scenario: string;
+  instructions: string;
+}
+
+const testCards: TestCard[] = [
+  {
+    number: '4242424242424242',
+    scenario: 'Successful payment',
+    instructions: 'Payment succeeds without authentication'
+  },
+  {
+    number: '4000002500003155',
+    scenario: 'Authentication required',
+    instructions: 'Payment requires authentication'
+  },
+  {
+    number: '4000000000009995',
+    scenario: 'Payment declined',
+    instructions: 'Card declined (insufficient funds)'
+  },
+  {
+    number: '6205500000000000004',
+    scenario: 'UnionPay card',
+    instructions: 'Variable length 13-19 digits'
+  }
+];
+
 const ConnectedAccountsPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +94,8 @@ const ConnectedAccountsPage = () => {
     clientSecret: string;
     accountId: string;
   } | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState<number>(10);
+  const [showInfoModal, setShowInfoModal] = useState(false);
 
   useEffect(() => {
     fetchAccounts();
@@ -112,6 +144,12 @@ const ConnectedAccountsPage = () => {
 
   const handleTestPayment = async (accountId: string) => {
     try {
+      const amountInCents = Math.round(paymentAmount * 100);
+      if (amountInCents < 50) {
+        toast.error('Minimum payment amount is $0.50');
+        return;
+      }
+
       const response = await axios.post<CheckoutSessionResponse>(
         `${import.meta.env.VITE_SERVERLESS_API_URL}/create-checkout-session`,
         {
@@ -124,7 +162,7 @@ const ConnectedAccountsPage = () => {
                 product_data: {
                   name: 'Test Product'
                 },
-                unit_amount: 1000 // $10.00
+                unit_amount: amountInCents
               },
               quantity: 1
             }
@@ -152,6 +190,65 @@ const ConnectedAccountsPage = () => {
   const handleCloseCheckout = () => {
     setCheckoutData(null);
   };
+
+  const TestCardInfoModal = () => (
+    <AnimatePresence>
+      {showInfoModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowInfoModal(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-semibold">Test Card Information</h3>
+              <button
+                onClick={() => setShowInfoModal(false)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+            <div className="space-y-4">
+              {testCards.map((card, index) => (
+                <motion.div
+                  key={card.number}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                >
+                  <div className="font-mono text-sm mb-2">{card.number}</div>
+                  <div className="text-sm font-semibold mb-1">{card.scenario}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">
+                    {card.instructions}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 
   return (
     <Container>
@@ -247,33 +344,75 @@ const ConnectedAccountsPage = () => {
                             Access Dashboard
                           </motion.button>
 
-                          <motion.button
-                            whileHover={{ scale: 1.01 }}
-                            whileTap={{ scale: 0.99 }}
-                            onClick={() => handleTestPayment(account.id)}
-                            className="w-full px-4 py-2 text-sm text-emerald-600 dark:text-emerald-500
-                                 hover:bg-emerald-50 dark:hover:bg-emerald-900/20
-                                 rounded-lg transition-colors
-                                 bg-emerald-50/50 dark:bg-emerald-900/10
-                                 border border-emerald-200 dark:border-emerald-800
-                                 flex items-center justify-center gap-2"
-                          >
-                            <svg
-                              className="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                              xmlns="http://www.w3.org/2000/svg"
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2">
+                              <div className="relative flex-1">
+                                <input
+                                  type="number"
+                                  value={paymentAmount}
+                                  onChange={(e) =>
+                                    setPaymentAmount(Math.max(0.5, Number(e.target.value)))
+                                  }
+                                  className="w-full px-4 py-2 text-sm rounded-lg
+                                           bg-white dark:bg-gray-800
+                                           border border-gray-200 dark:border-gray-700
+                                           focus:ring-2 focus:ring-primary/50 focus:border-primary
+                                           transition-colors"
+                                  min="0.50"
+                                  step="0.01"
+                                />
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                                  USD
+                                </span>
+                              </div>
+                              <button
+                                onClick={() => setShowInfoModal(true)}
+                                className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 
+                                         dark:hover:text-gray-200 transition-colors"
+                                title="View test card information"
+                              >
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                            <motion.button
+                              whileHover={{ scale: 1.01 }}
+                              whileTap={{ scale: 0.99 }}
+                              onClick={() => handleTestPayment(account.id)}
+                              className="w-full px-4 py-2 text-sm text-emerald-600 dark:text-emerald-500
+                                     hover:bg-emerald-50 dark:hover:bg-emerald-900/20
+                                     rounded-lg transition-colors
+                                     bg-emerald-50/50 dark:bg-emerald-900/10
+                                     border border-emerald-200 dark:border-emerald-800
+                                     flex items-center justify-center gap-2"
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-                              />
-                            </svg>
-                            Make Test Payment
-                          </motion.button>
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                                />
+                              </svg>
+                              Make Test Payment
+                            </motion.button>
+                          </div>
                         </>
                       )}
                       <motion.button
@@ -344,6 +483,8 @@ const ConnectedAccountsPage = () => {
           onClose={handleCloseCheckout}
         />
       )}
+
+      <TestCardInfoModal />
     </Container>
   );
 };
