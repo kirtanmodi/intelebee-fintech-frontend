@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Container } from '@/components';
 import axios from 'axios';
 import { toast } from 'sonner';
+import EmbeddedUI from './EmbeddedUI';
 
 interface Account {
   id: string;
@@ -45,7 +46,7 @@ const ConnectedAccountsPage = () => {
       const response = await axios.get(
         `${import.meta.env.VITE_SERVERLESS_API_URL}/get-all-accounts`
       );
-      setAccounts(response.data);
+      setAccounts(response.data?.accounts?.data);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch accounts';
       toast.error(errorMessage);
@@ -57,19 +58,21 @@ const ConnectedAccountsPage = () => {
 
   const handleDashboardAccess = async (accountId: string) => {
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_SERVERLESS_API_URL}/create-express-dashboard-link`,
-        {
-          accountId,
-          returnUrl: `${window.location.origin}/connected-accounts`
-        }
-      );
+      // const response = await axios.post(
+      setShowDashboardModal(true);
+      setSelectedAccount(accountId);
 
-      if (response.data?.url) {
-        window.location.href = response.data.url;
-      } else {
-        throw new Error('No dashboard login URL received');
-      }
+      //   `${import.meta.env.VITE_SERVERLESS_API_URL}/create-express-dashboard-link`,
+      //   {
+      //     accountId,
+      //     returnUrl: `${window.location.origin}/connected-accounts`
+      //   }
+      // );
+      // if (response.data?.url) {
+      //   window.location.href = response.data.url;
+      // } else {
+      //   throw new Error('No dashboard login URL received');
+      // }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to access dashboard';
       toast.error(errorMessage);
@@ -175,33 +178,36 @@ const ConnectedAccountsPage = () => {
                     </div>
 
                     <div className="flex flex-col gap-2 mt-4">
-                      <motion.button
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.99 }}
-                        onClick={() => handleDashboardAccess(account.id)}
-                        className="w-full px-4 py-2 text-sm text-primary dark:text-primary 
+                      {account.charges_enabled && (
+                        <>
+                          <motion.button
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.99 }}
+                            onClick={() => handleDashboardAccess(account.id)}
+                            className="w-full px-4 py-2 text-sm text-primary dark:text-primary 
                                  hover:bg-primary/10 dark:hover:bg-primary/20 
                                  rounded-lg transition-colors 
                                  bg-primary/5 dark:bg-primary/10
                                  border border-primary/20 dark:border-primary/30"
-                      >
-                        Access Dashboard
-                      </motion.button>
+                          >
+                            Access Dashboard
+                          </motion.button>
 
-                      <motion.button
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.99 }}
-                        onClick={() => handleUpdateSettings(account.id)}
-                        disabled={updating === account.id}
-                        className="w-full px-4 py-2 text-sm text-primary dark:text-primary 
+                          {/* <motion.button
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.99 }}
+                            onClick={() => handleUpdateSettings(account.id)}
+                            disabled={updating === account.id}
+                            className="w-full px-4 py-2 text-sm text-primary dark:text-primary 
                                  hover:bg-primary/10 dark:hover:bg-primary/20 
                                  rounded-lg transition-colors 
                                  bg-primary/5 dark:bg-primary/10
                                  border border-primary/20 dark:border-primary/30"
-                      >
-                        {updating === account.id ? 'Updating...' : 'Configure Dashboard'}
-                      </motion.button>
-
+                          >
+                            {updating === account.id ? 'Updating...' : 'Configure Dashboard'}
+                          </motion.button> */}
+                        </>
+                      )}
                       <motion.button
                         whileHover={{ scale: 1.01 }}
                         whileTap={{ scale: 0.99 }}
@@ -224,7 +230,7 @@ const ConnectedAccountsPage = () => {
       </motion.div>
 
       {/* Dashboard Configuration Modal */}
-      <AnimatePresence>
+      <AnimatePresence mode="popLayout" presenceAffectsLayout={true}>
         {showDashboardModal && selectedAccount && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -237,14 +243,27 @@ const ConnectedAccountsPage = () => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+              className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-xl w-full h-screen overflow-y-auto relative"
               onClick={(e) => e.stopPropagation()}
             >
-              <iframe
-                src={`/dashboard-config/${selectedAccount}`}
-                className="w-full h-[80vh]"
-                title="Dashboard Configuration"
-              />
+              <button
+                onClick={() => setShowDashboardModal(false)}
+                className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                aria-label="Close modal"
+              >
+                <svg
+                  className="w-6 h-6 text-gray-500 dark:text-gray-400"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+              {selectedAccount && <EmbeddedUI accountId={selectedAccount} />}
             </motion.div>
           </motion.div>
         )}
