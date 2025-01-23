@@ -14,6 +14,7 @@ import StandardDashboardAccess from '@/pages/stripe-standard/dashboard/StandardD
 import { StandardOnboarding } from '@/pages/stripe-standard/standard-onboarding/StandardOnboarding';
 import OnboardingComplete from '@/pages/stripe-express/onboarding/OnboardingComplete';
 import StandardOnboardingComplete from '@/pages/stripe-standard/standard-onboarding/StandardOnboardingComplete';
+import PayrixOnboarding from '@/pages/payrix/payrix-onboarding/PayrixOnboarding';
 
 const AppRoutingSetup = (): ReactElement => {
   return (
@@ -36,6 +37,9 @@ const AppRoutingSetup = (): ReactElement => {
           <Route path="/stripe-standard/dashboard/config" element={<ExpressDashboardConfig />} />
           {/* Connected Accounts */}
           <Route path="/connected-accounts" element={<ConnectedAccountsPage />} />
+          {/* Payrix */}
+          <Route path="/payrix-onboarding" element={<PayrixOnboarding />} />
+
           {/* <Route path="/dark-sidebar" element={<Demo1DarkSidebarPage />} />
           <Route path="/public-profile/profiles/default" element={<ProfileDefaultPage />} />
           <Route path="/public-profile/profiles/creator" element={<ProfileCreatorPage />} />

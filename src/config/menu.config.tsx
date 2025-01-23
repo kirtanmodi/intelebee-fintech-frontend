@@ -6,6 +6,9 @@ export const MENU_SIDEBAR: TMenuConfig = [
     icon: 'abstract',
     path: '/'
   },
+  {
+    heading: 'Stripe'
+  },
   // {
   //   title: 'Stripe Express',
   //   icon: 'abstract-1',
@@ -36,6 +39,14 @@ export const MENU_SIDEBAR: TMenuConfig = [
     title: 'Connected Accounts',
     icon: 'users',
     path: '/connected-accounts'
+  },
+  {
+    heading: 'Payrix'
+  },
+  {
+    title: 'Payrix Onboarding',
+    icon: 'abstract-2',
+    path: '/payrix-onboarding'
   }
   // {
   //   heading: 'User'
