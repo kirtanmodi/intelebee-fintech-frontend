@@ -181,9 +181,9 @@ const PayrixUsersPage = () => {
         `${import.meta.env.VITE_SERVERLESS_API_URL}/payrix/merchants`
       );
 
-      console.log(response?.data.merchants?.response.data);
+      console.log('%c check', 'color: red; font-weight: bold;', response?.data?.data.response.data);
 
-      const formattedMerchants = response.data.merchants?.response.data.map((merchant: any) => ({
+      const formattedMerchants = response?.data?.data?.response?.data?.map((merchant: any) => ({
         id: merchant.id,
         name: merchant.name,
         email: merchant.email,
