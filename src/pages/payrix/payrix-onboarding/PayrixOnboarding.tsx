@@ -47,7 +47,7 @@ const merchantSchema = z.object({
         first: z.string().min(1, 'First name is required'),
         middle: z.string().nullable(),
         last: z.string().min(1, 'Last name is required'),
-        ssn: z.string().nullable(),
+        // ssn: z.string().nullable(),
         dob: z.string().regex(/^\d{8}$/, 'Date format: YYYYMMDD'),
         dl: z.string().min(1, 'Driver license number required'),
         dlstate: z.string().length(2, 'Valid state code required'),
@@ -114,7 +114,7 @@ const generateRandomData = () => {
           first: 'John',
           middle: Math.random() > 0.5 ? 'Michael' : '',
           last: 'Smith',
-          ssn: '',
+          // ssn: '',
           dob: randomDate(),
           dl: `DL${randomNum(8)}`,
           dlstate: 'NY',
@@ -133,6 +133,43 @@ const generateRandomData = () => {
     }
   };
 };
+
+// Add this interface near the top of the file
+interface PayrixResponse {
+  data: {
+    response: {
+      data: [
+        {
+          id: string;
+          name: string;
+          merchant: {
+            id: string;
+            members: [
+              {
+                id: string;
+                title: string;
+                first: string;
+                last: string;
+                email: string;
+              }
+            ];
+          };
+          accounts: [
+            {
+              id: string;
+              token: string;
+              account: {
+                number: string;
+                routing: string;
+              };
+            }
+          ];
+        }
+      ];
+      errors: any[];
+    };
+  };
+}
 
 const PayrixOnboarding: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -173,7 +210,7 @@ const PayrixOnboarding: React.FC = () => {
           first: '',
           middle: '',
           last: '',
-          ssn: '',
+          // ssn: '',
           dob: '',
           dl: '',
           dlstate: '',
@@ -192,26 +229,27 @@ const PayrixOnboarding: React.FC = () => {
     }
   });
 
+  // Add this state
+  const [successData, setSuccessData] = useState<
+    PayrixResponse['data']['response']['data'][0] | null
+  >(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Validate form data
       merchantSchema.parse(formData);
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_SERVERLESS_API_URL}/payrix/merchant`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            APIKEY: import.meta.env.VITE_PAYRIX_API_KEY
-          }
-        }
+      const response = await axios.post<PayrixResponse>(
+        `${import.meta.env.VITE_PAYRIX_API_URL}/payrix/merchant`,
+        formData
       );
 
+      console.log(response);
+
       if (response.status === 200) {
+        setSuccessData(response?.data?.data?.response?.data[0]);
         toast.success('Merchant account created successfully');
       }
     } catch (error) {
@@ -266,6 +304,14 @@ const PayrixOnboarding: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="max-w-4xl mx-auto p-6"
     >
+      <motion.h1
+        className="text-3xl font-bold text-gray-700 dark:text-gray-300 mb-4"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        Payrix Onboarding
+      </motion.h1>
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Company Information */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
@@ -634,6 +680,131 @@ const PayrixOnboarding: React.FC = () => {
           </motion.button>
         </div>
       </form>
+
+      {/* Add this success modal */}
+      {successData && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+          onClick={() => setSuccessData(null)}
+        >
+          <motion.div
+            initial={{ scale: 0.95 }}
+            animate={{ scale: 1 }}
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full p-6 space-y-4 overflow-y-auto max-h-[90vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Merchant Account Created Successfully
+              </h2>
+              <button
+                onClick={() => setSuccessData(null)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {/* Entity Information */}
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">
+                  Entity Information
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Entity ID</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{successData.id}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Business Name</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{successData.name}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Merchant Information */}
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">
+                  Merchant Information
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Merchant ID</p>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {successData.merchant.id}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Primary Contact</p>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {successData.merchant.members[0].first} {successData.merchant.members[0].last}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Account Information */}
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">
+                  Account Information
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Account ID</p>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {successData.accounts[0].id}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Account Token</p>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {successData.accounts[0].token}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setSuccessData(null)}
+                  className="w-full py-2 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    // Add functionality to download JSON
+                    const dataStr = JSON.stringify(successData, null, 2);
+                    const blob = new Blob([dataStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `merchant-${successData.id}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="w-full py-2 px-4 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                >
+                  Download Details
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
     </motion.div>
   );
 };
