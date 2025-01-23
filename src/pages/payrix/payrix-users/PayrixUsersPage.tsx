@@ -19,36 +19,74 @@ interface PayrixMerchant {
   frozen: number;
 }
 
+interface PayrixErrorResponse {
+  response: {
+    errors: Array<{
+      code: number;
+      severity: number;
+      msg: string;
+      errorCode: string;
+    }>;
+  };
+}
+
 const PayrixUsersPage = () => {
   const [loading, setLoading] = useState(false);
   const [merchants, setMerchants] = useState<PayrixMerchant[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  const handleDelete = async (merchantId: string) => {
+    try {
+      setLoading(true);
+      await axios.delete(
+        `${import.meta.env.VITE_SERVERLESS_API_URL}/payrix/merchants/${merchantId}`
+      );
+      await fetchMerchants();
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.data) {
+        const payrixError = err.response.data as PayrixErrorResponse;
+        const errorMessage = payrixError.response.errors?.[0]?.msg || 'Failed to delete merchant';
+        setError(`${errorMessage}. Please try again later.`);
+      } else {
+        setError('Failed to delete merchant. Please try again later.');
+      }
+      console.error('Error deleting merchant:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const columns: ColumnsType<PayrixMerchant> = [
     {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
-      sorter: (a, b) => a.name.localeCompare(b.name)
+      sorter: (a, b) => a.name.localeCompare(b.name),
+      className: 'text-gray-900 font-medium'
     },
     {
       title: 'Email',
       dataIndex: 'email',
-      key: 'email'
+      key: 'email',
+      className: 'text-gray-600'
     },
     {
       title: 'Phone',
       dataIndex: 'phone',
       key: 'phone',
       render: (phone: string) => {
-        return phone ? formatPhoneNumber(phone) : '-';
+        return phone ? (
+          <span className="text-gray-600">{formatPhoneNumber(phone)}</span>
+        ) : (
+          <span className="text-gray-400">-</span>
+        );
       }
     },
     {
       title: 'Location',
       key: 'location',
       render: (_, record) => (
-        <span>
+        <span className="text-gray-600">
           {record.city}, {record.state} {record.zip}
         </span>
       )
@@ -58,14 +96,52 @@ const PayrixUsersPage = () => {
       key: 'status',
       render: (_, record) => {
         const status = getStatus(record);
-        return <span className={`badge badge-light-${getStatusColor(status)}`}>{status}</span>;
+        return (
+          <span
+            className={`
+              inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+              ${status === 'active' && 'bg-green-100 text-green-800'} 
+              ${status === 'inactive' && 'bg-yellow-100 text-yellow-800'}
+              ${status === 'frozen' && 'bg-red-100 text-red-800'}
+            `}
+          >
+            {status}
+          </span>
+        );
       }
     },
     {
       title: 'Created',
       dataIndex: 'created',
       key: 'created',
-      render: (date: string) => new Date(date).toLocaleDateString()
+      render: (date: string) => (
+        <span className="text-gray-600">{new Date(date).toLocaleDateString()}</span>
+      )
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      render: (_, record) => (
+        <button
+          className="
+            px-3 py-1.5 
+            text-sm font-medium
+            text-red-700 hover:text-red-800
+            bg-red-50 hover:bg-red-100
+            border border-transparent
+            rounded-md
+            transition-colors duration-200
+            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500
+          "
+          onClick={() => {
+            if (window.confirm('Are you sure you want to delete this merchant?')) {
+              handleDelete(record.id);
+            }
+          }}
+        >
+          Delete
+        </button>
+      )
     }
   ];
 
