@@ -44,9 +44,19 @@ export const MENU_SIDEBAR: TMenuConfig = [
     heading: 'Payrix'
   },
   {
-    title: 'Payrix Onboarding',
+    title: 'Payrix',
     icon: 'abstract-2',
-    path: '/payrix-onboarding'
+    path: '/payrix',
+    children: [
+      {
+        title: 'Onboard',
+        path: '/payrix-onboarding'
+      },
+      {
+        title: 'Users',
+        path: '/payrix-users'
+      }
+    ]
   }
   // {
   //   heading: 'User'

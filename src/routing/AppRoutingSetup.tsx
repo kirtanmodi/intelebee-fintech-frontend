@@ -15,6 +15,7 @@ import { StandardOnboarding } from '@/pages/stripe-standard/standard-onboarding/
 import OnboardingComplete from '@/pages/stripe-express/onboarding/OnboardingComplete';
 import StandardOnboardingComplete from '@/pages/stripe-standard/standard-onboarding/StandardOnboardingComplete';
 import PayrixOnboarding from '@/pages/payrix/payrix-onboarding/PayrixOnboarding';
+import PayrixUsersPage from '@/pages/payrix/payrix-users/PayrixUsersPage';
 
 const AppRoutingSetup = (): ReactElement => {
   return (
@@ -39,6 +40,7 @@ const AppRoutingSetup = (): ReactElement => {
           <Route path="/connected-accounts" element={<ConnectedAccountsPage />} />
           {/* Payrix */}
           <Route path="/payrix-onboarding" element={<PayrixOnboarding />} />
+          <Route path="/payrix-users" element={<PayrixUsersPage />} />
 
           {/* <Route path="/dark-sidebar" element={<Demo1DarkSidebarPage />} />
           <Route path="/public-profile/profiles/default" element={<ProfileDefaultPage />} />
