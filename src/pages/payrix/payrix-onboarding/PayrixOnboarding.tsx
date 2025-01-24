@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios, { AxiosError } from 'axios';
 import { toast } from 'sonner';
@@ -171,6 +171,27 @@ interface PayrixResponse {
   };
 }
 
+declare global {
+  interface Window {
+    PayFrame: {
+      config: {
+        apiKey: string;
+        merchant: string;
+        image: string;
+        name: string;
+        description: string;
+        hideBillingAddress: boolean;
+        amount: number;
+        color: string;
+        mode: string;
+      };
+      popup: () => void;
+    };
+  }
+}
+
+export {};
+
 const PayrixOnboarding: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -234,6 +255,38 @@ const PayrixOnboarding: React.FC = () => {
     PayrixResponse['data']['response']['data'][0] | null
   >(null);
 
+  // Add state for amount
+  const [amount, setAmount] = useState<number>(10000);
+
+  useEffect(() => {
+    // Load PayFrame script
+    const script = document.createElement('script');
+    script.src = 'https://test-api.payrix.com/payFrameScript';
+    script.async = true;
+    script.onload = () => {
+      // Configure PayFrame after script loads
+      const PayFrame = (window as any).PayFrame;
+      PayFrame.config = {
+        apiKey: '4523385f4af70adf260eadf0f6ea4e95',
+        merchant: 't1_mer_67929642066fcb5dee2818b',
+        image:
+          'https://images.squarespace-cdn.com/content/v1/65bcce1aeef21c33179ebbe8/91823e55-20f2-41e5-83eb-74071343b672/Untitled_design__8_-removebg-preview.png',
+        name: 'IntelebeeLLC',
+        description: 'test description',
+        hideBillingAddress: true,
+        amount: amount,
+        color: '64b5f6',
+        mode: 'txn'
+      };
+    };
+    document.body.appendChild(script);
+
+    // Cleanup
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -296,6 +349,20 @@ const PayrixOnboarding: React.FC = () => {
   // Add this handler
   const handleFillSampleData = () => {
     setFormData(generateRandomData());
+  };
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newAmount = parseFloat(e.target.value) * 100;
+    setAmount(newAmount);
+    if (window.PayFrame) {
+      window.PayFrame.config.amount = newAmount;
+    }
+  };
+
+  const handlePayFramePopup = () => {
+    if (window.PayFrame?.popup) {
+      window.PayFrame.popup();
+    }
   };
 
   return (
@@ -805,6 +872,29 @@ const PayrixOnboarding: React.FC = () => {
           </motion.div>
         </motion.div>
       )}
+
+      <motion.div
+        style={{}}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
+        <div className="flex flex-col items-center gap-4 mt-4">
+          <input
+            type="number"
+            placeholder="Amount"
+            onChange={handleAmountChange}
+            defaultValue={amount / 100}
+            className="w-[300px] h-[30px] px-2 border border-gray-300 rounded"
+          />
+          <button
+            onClick={handlePayFramePopup}
+            className="w-[300px] h-[30px] bg-[#64b5f6] text-white cursor-pointer border-0"
+          >
+            Test Payment Frame
+          </button>
+        </div>
+      </motion.div>
     </motion.div>
   );
 };

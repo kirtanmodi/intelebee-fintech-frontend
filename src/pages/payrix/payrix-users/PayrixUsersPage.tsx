@@ -68,7 +68,8 @@ const PayrixUsersPage = () => {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
-      className: 'text-gray-600'
+      className: 'text-gray-600',
+      sorter: (a, b) => a.email.localeCompare(b.email)
     },
     {
       title: 'Phone',
